@@ -20,7 +20,7 @@ pipeline{
             steps{
             gitCheckout(
                 branch: "main",
-                url: "https://github.com/praveen1994dec/Java_app_3.0.git"
+                url: "https://github.com/ThakkallapelliSwetha/Java_app_3.0.git"
             )
             }
         }
@@ -44,6 +44,45 @@ pipeline{
                }
             }
         }
+        
+        stage('Server'){
+            steps{
+                rtServer (
+                    id: 'Jfrog',
+                    url: 'http://34.226.123.45:8082/artifactory',
+                    username: 'admin',
+                    password: 'Chesh@12345',
+                    //credentialsId: 'ccrreeddeennttiiaall',
+                    bypassProxy: true,
+                    // Configure the connection timeout (in seconds).
+                    // The default value (if not configured) is 300 seconds:
+                    timeout: 300
+                    )
+            }
+        }
+        stage('upload'){
+            steps{
+                rtDownload (
+                    serverId: 'Jfrog',
+                    spec: '''{
+                    "files": [
+                    {
+                    "pattern": "*.jar",
+                    "target": "example-repo-local1-libs-release/"
+                    }
+                    ]
+                    }''',
+
+    // Optional - Associate the downloaded files with the following custom build name and build number, 
+    // as build dependencies.
+    // If not set, the files will be associated with the default build name and build number (i.e the 
+    // the Jenkins job name and number).
+    //buildName: 'holyFrog',
+    //buildNumber: '42',
+    // Optional - Only if this build is associated with a project in Artifactory, set the project key as follows.
+    //project: 'my-project-key'
+)
+
         stage('Static code analysis: Sonarqube'){
          when { expression {  params.action == 'create' } }
             steps{
